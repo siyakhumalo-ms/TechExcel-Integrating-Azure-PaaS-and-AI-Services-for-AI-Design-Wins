@@ -79,4 +79,4 @@ jobs:
     - uses: azure/webapps-deploy@v2
       with:
         app-name: '${{ env.resourcePrefix }}-api'
-        images: ${{ env.registryName }}/techexcel/csapi:${{github.run_number}}
+        images: ${{ env.registryName }}/techexcel/csapi:${{ github.run_number }}
