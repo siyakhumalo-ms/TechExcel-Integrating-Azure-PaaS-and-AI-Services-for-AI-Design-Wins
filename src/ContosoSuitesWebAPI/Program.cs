@@ -10,6 +10,21 @@ using Azure;
 using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+var cosmosConnectionString = builder.Configuration["CosmosDB:ConnectionString"];
+if (string.IsNullOrEmpty(cosmosConnectionString))
+{
+    throw new InvalidOperationException("CosmosDB connection string is not configured.");
+}
+
+builder.Services.AddSingleton<CosmosClient>((_) =>
+{
+    CosmosClient client = new(
+        connectionString: builder.Configuration[cosmosConnectionString]!
+    );
+    return client;
+});
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -19,14 +34,6 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IDatabaseService, DatabaseService>();
 builder.Services.AddSingleton<IVectorizationService, VectorizationService>();
 builder.Services.AddSingleton<MaintenanceCopilot, MaintenanceCopilot>();
-
-builder.Services.AddSingleton<CosmosClient>((_) =>
-{
-    CosmosClient client = new(
-        connectionString: builder.Configuration["CosmosDB:ConnectionString"]!
-    );
-    return client;
-});
 
 builder.Services.AddSingleton<AzureOpenAIClient>((_) =>
 {
@@ -57,21 +64,24 @@ app.MapGet("/", async () =>
 
 app.MapGet("/Hotels", async () => 
 {
-    throw new NotImplementedException();
+    var hotels = await app.Services.GetRequiredService<IDatabaseService>().GetHotels();
+    return hotels;
 })
     .WithName("GetHotels")
     .WithOpenApi();
 
 app.MapGet("/Hotels/{hotelId}/Bookings/", async (int hotelId) => 
 {
-    throw new NotImplementedException();
+    var bookings = await app.Services.GetRequiredService<IDatabaseService>().GetBookingsForHotel(hotelId);
+    return bookings;
 })
     .WithName("GetBookingsForHotel")
     .WithOpenApi();
 
 app.MapGet("/Hotels/{hotelId}/Bookings/{min_date}", async (int hotelId, DateTime min_date) => 
 {
-    throw new NotImplementedException();
+    var bookings = await app.Services.GetRequiredService<IDatabaseService>().GetBookingsByHotelAndMinimumDate(hotelId, min_date);
+    return bookings;
 })
     .WithName("GetRecentBookingsForHotel")
     .WithOpenApi();
