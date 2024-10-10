@@ -19,16 +19,10 @@ var config = new ConfigurationBuilder()
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .Build();
 
-var cosmosConnectionString = builder.Configuration["CosmosDB:ConnectionString"];
-if (string.IsNullOrEmpty(cosmosConnectionString))
-{
-    throw new InvalidOperationException("CosmosDB connection string is not configured.");
-}
-
 builder.Services.AddSingleton<CosmosClient>((_) =>
 {
     CosmosClient client = new(
-        connectionString: builder.Configuration[cosmosConnectionString]!
+        connectionString: builder.Configuration["CosmosDB:ConnectionString"]!
     );
     return client;
 });
