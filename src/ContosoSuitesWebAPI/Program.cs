@@ -16,13 +16,12 @@ var builder = WebApplication.CreateBuilder(args);
 var config = new ConfigurationBuilder()
     .AddUserSecrets<Program>()
     .AddEnvironmentVariables()
-    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .Build();
 
 builder.Services.AddSingleton<CosmosClient>((_) =>
 {
     CosmosClient client = new(
-        connectionString: builder.Configuration["CosmosDB:ConnectionString"]!
+        connectionString: builder.Configuration["SQLCONNSTR_ContosoSuites"]!
     );
     return client;
 });
@@ -63,9 +62,9 @@ var app = builder.Build();
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-//} 
+app.UseSwagger();
+app.UseSwaggerUI();
+//}
 
 app.UseHttpsRedirection();
 
