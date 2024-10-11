@@ -21,7 +21,7 @@ var config = new ConfigurationBuilder()
 builder.Services.AddSingleton<CosmosClient>((_) =>
 {
     CosmosClient client = new(
-        connectionString: builder.Configuration["SQLCONNSTR_ContosoSuites"]!
+        connectionString: builder.Configuration["CosmosDB:ConnectionString"]!
     );
     return client;
 });
