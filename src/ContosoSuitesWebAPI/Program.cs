@@ -69,22 +69,6 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
-app.MapPost("/Chat", async Task<string> (HttpRequest request) =>
-{
-    var message = await Task.FromResult(request.Form["message"]);
-    var kernel = app.Services.GetRequiredService<Kernel>();
-    var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
-    var executionSettings = new OpenAIPromptExecutionSettings
-    {
-        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
-    };
-    var response = await chatCompletionService.GetChatMessageContentAsync(message.ToString(), executionSettings, kernel);
-    return response?.Content!;
-})
-    .WithName("Chat")
-    .WithOpenApi();
-
-
 app.MapGet("/", async () => 
 {
     return "Welcome to the Contoso Suites Web API!";
@@ -116,6 +100,21 @@ app.MapGet("/Hotels/{hotelId}/Bookings/{min_date}", async (int hotelId, DateTime
     .WithName("GetRecentBookingsForHotel")
     .WithOpenApi();
 
+app.MapPost("/Chat", async Task<string> (HttpRequest request) =>
+{
+    var message = await Task.FromResult(request.Form["message"]);
+    var kernel = app.Services.GetRequiredService<Kernel>();
+    var chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
+    var executionSettings = new OpenAIPromptExecutionSettings
+    {
+        ToolCallBehavior = ToolCallBehavior.AutoInvokeKernelFunctions
+    };
+    var response = await chatCompletionService.GetChatMessageContentAsync(message.ToString(), executionSettings, kernel);
+    return response?.Content!;
+})
+    .WithName("Chat")
+    .WithOpenApi();
+
 app.MapGet("/Vectorize", async (string text, [FromServices] IVectorizationService vectorizationService) =>
 {
     var embeddings = await vectorizationService.GetEmbeddings(text);
@@ -127,7 +126,9 @@ app.MapGet("/Vectorize", async (string text, [FromServices] IVectorizationServic
 app.MapPost("/VectorSearch", async ([FromBody] float[] queryVector, [FromServices] IVectorizationService vectorizationService, int max_results = 0, double minimum_similarity_score = 0.8) =>
 {
     // Exercise 3 Task 3 TODO #3: Insert code to call the ExecuteVectorSearch function on the Vectorization Service. Don't forget to remove the NotImplementedException.
-    throw new NotImplementedException();
+    var results = await vectorizationService.ExecuteVectorSearch(queryVector, max_results, minimum_similarity_score);
+    return results;
+
 })
     .WithName("VectorSearch")
     .WithOpenApi();
