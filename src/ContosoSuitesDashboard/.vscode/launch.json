@@ -1,16 +1,17 @@
 {
     "version": "0.2.0",
     "configurations": [
+
         {
             "name": "Python:Streamlit",
             "type": "debugpy",
             "request": "launch",
-            "module": "streamlit",
+            "program": ".venv/Lib/site-packages/streamlit",
+            "console": "integratedTerminal",
+            "justMyCode": true,
             "args": [
                 "run",
-                "${file}",
-                "--server.port",
-                "3561"
+                "Index.py"
             ]
         }
     ]
